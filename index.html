@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Jimmy Buffett Song Ranker</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: #00b4db;
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .container {
+                background: #ffffff;
+                border-radius: 25px;
+                box-shadow: 0 25px 50px rgba(0, 180, 219, 0.2);
+                padding: 40px;
+                max-width: 600px;
+                width: 100%;
+                text-align: center;
+                border: 2px solid #00d4aa;
+            }
+
+            h1 {
+                color: #ff6b6b;
+                margin-bottom: 30px;
+                font-size: 2.5rem;
+                font-weight: 600;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .game-area {
+                margin: 30px 0;
+            }
+
+            .comparison-container {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                margin: 30px 0;
+                flex-wrap: wrap;
+            }
+
+            .item-card {
+                background: #f0fdfa;
+                border: 3px solid #00d4aa;
+                border-radius: 20px;
+                padding: 30px;
+                min-width: 200px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(0, 212, 170, 0.15);
+            }
+
+            .item-card:hover {
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 15px 35px rgba(0, 180, 219, 0.25);
+                border-color: #00b4db;
+                background: #e6fffa;
+            }
+
+            .item-card.selected {
+                border-color: #ff6b6b;
+                background: #ffe6e6;
+                box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
+            }
+
+            .item-name {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #2d3748;
+                margin-bottom: 15px;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .item-score {
+                font-size: 2rem;
+                font-weight: bold;
+                color: #00b4db;
+                margin-bottom: 20px;
+            }
+
+            .select-button {
+                background: #00b4db;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 30px;
+                font-size: 1.5rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+            }
+
+            .select-button:hover {
+                background: #00a0c7;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 180, 219, 0.4);
+            }
+
+            .select-button:active {
+                transform: translateY(-1px);
+            }
+
+            .options-section {
+                margin-top: 40px;
+                padding: 25px;
+                background: #f0fdfa;
+                border-radius: 20px;
+                border: 2px solid #00d4aa;
+                box-shadow: 0 8px 20px rgba(0, 212, 170, 0.15);
+            }
+
+            .options-section h3 {
+                color: #00b4db;
+                margin-bottom: 20px;
+                font-size: 1.3rem;
+                font-weight: 600;
+            }
+
+            .options-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 30px;
+                align-items: center;
+            }
+
+            .option-item {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .option-item label {
+                font-weight: 600;
+                color: #2d3748;
+                font-size: 0.95rem;
+            }
+
+            .checkbox-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                font-weight: 600;
+                color: #2d3748;
+                font-size: 0.95rem;
+            }
+
+            .checkbox-input {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                accent-color: #00d4aa;
+            }
+
+            .checkbox-text {
+                user-select: none;
+            }
+
+            .variance-slider {
+                width: 100%;
+                height: 8px;
+                border-radius: 10px;
+                background: #00b4db;
+                outline: none;
+                -webkit-appearance: none;
+                cursor: pointer;
+            }
+
+            .variance-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: #ff6b6b;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            }
+
+            .variance-slider::-webkit-slider-thumb:hover {
+                background: #ff5252;
+                transform: scale(1.1);
+                box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+            }
+
+            .variance-slider::-moz-range-thumb {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: #ff6b6b;
+                cursor: pointer;
+                border: none;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            }
+
+            .variance-slider::-moz-range-thumb:hover {
+                background: #ff5252;
+                transform: scale(1.1);
+                box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+            }
+
+            .variance-value {
+                font-weight: 600;
+                color: #00b4db;
+                font-size: 1.1rem;
+                text-align: center;
+                min-width: 30px;
+            }
+
+            .list-controls {
+                margin-top: 20px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .list-button {
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            }
+
+            .list-button:hover {
+                background: #ff5252;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            }
+
+            .list-button:active {
+                transform: translateY(-1px);
+            }
+
+            .ranking-list {
+                margin-top: 30px;
+                padding: 25px;
+                background: #f0fdfa;
+                border-radius: 20px;
+                border: 2px solid #00d4aa;
+                box-shadow: 0 8px 20px rgba(0, 212, 170, 0.15);
+            }
+
+            .ranking-list h3 {
+                color: #00b4db;
+                margin-bottom: 20px;
+                font-size: 1.3rem;
+                font-weight: 600;
+                text-align: center;
+            }
+
+            .ranking-content {
+                max-height: 400px;
+                overflow-y: auto;
+                border: 2px solid #00d4aa;
+                border-radius: 15px;
+                background: #ffffff;
+                box-shadow: inset 0 2px 8px rgba(0, 212, 170, 0.1);
+            }
+
+            .ranking-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 20px;
+                border-bottom: 1px solid rgba(0, 212, 170, 0.2);
+                transition: background-color 0.2s ease;
+            }
+
+            .ranking-item:hover {
+                background: #e6fffa;
+            }
+
+            .ranking-item:last-child {
+                border-bottom: none;
+            }
+
+            .ranking-position {
+                font-weight: bold;
+                color: #ff6b6b;
+                font-size: 1.1rem;
+                min-width: 40px;
+            }
+
+            .ranking-name {
+                flex: 1;
+                margin: 0 15px;
+                color: #2d3748;
+                font-weight: 500;
+            }
+
+            .ranking-score {
+                font-weight: bold;
+                color: #00b4db;
+                font-size: 1.1rem;
+                min-width: 50px;
+                text-align: right;
+            }
+
+            .votes-header {
+                background: #00b4db;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 15px 15px 0 0;
+                text-align: center;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3);
+            }
+
+            .votes-info {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .votes-label {
+                font-size: 1rem;
+            }
+
+            .votes-count {
+                font-size: 1.2rem;
+                font-weight: bold;
+                background: rgba(255, 255, 255, 0.2);
+                padding: 5px 12px;
+                border-radius: 15px;
+            }
+
+            .export-controls {
+                margin-top: 20px;
+                text-align: center;
+            }
+
+            .export-button {
+                background: #00d4aa;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+            }
+
+            .export-button:hover {
+                background: #00c49a;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+            }
+
+            .export-button:active {
+                transform: translateY(-1px);
+            }
+
+            .status-message {
+                margin: 20px 0;
+                padding: 15px;
+                border-radius: 15px;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .status-success {
+                background: #d4edda;
+                color: #155724;
+                border: 2px solid #00d4aa;
+            }
+
+            .status-error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 2px solid #ff6b6b;
+            }
+
+            @media (max-width: 768px) {
+                .comparison-container {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .item-card {
+                    min-width: 250px;
+                }
+
+                .options-grid {
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Jimmy Buffett Song Ranker</h1>
+
+            <div class="game-area">
+                <div id="comparisonContainer" class="comparison-container" style="display: none">
+                    <!-- Items will be dynamically inserted here -->
+                </div>
+
+                <div class="options-section">
+                    <h3>Options</h3>
+                    <div class="options-grid">
+                        <div class="option-item">
+                            <label for="toggleScores" class="checkbox-label">
+                                <input type="checkbox" id="toggleScores" class="checkbox-input" />
+                                <span class="checkbox-text">Show Scores</span>
+                            </label>
+                        </div>
+                        <div class="option-item">
+                            <label for="scoreVariance">Score Variance</label>
+                            <input
+                                type="range"
+                                id="scoreVariance"
+                                min="1"
+                                max="100"
+                                value="25"
+                                class="variance-slider"
+                            />
+                            <span id="varianceValue" class="variance-value">25</span>
+                        </div>
+                        <div class="option-item">
+                            <label for="minScore">Minimum Score</label>
+                            <input type="range" id="minScore" min="0" max="100" value="0" class="variance-slider" />
+                            <span id="minScoreValue" class="variance-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="rankingList" class="ranking-list">
+                    <h3>Song Rankings</h3>
+                    <div class="list-controls">
+                        <button id="toggleList" class="list-button">Show Full Ranking</button>
+                    </div>
+                    <div id="rankingContent" class="ranking-content" style="display: none">
+                        <!-- Rankings will be dynamically inserted here -->
+                    </div>
+                    <div class="export-controls" style="display: none">
+                        <button id="exportCsv" class="export-button">Export as CSV</button>
+                    </div>
+                </div>
+
+                <div id="statusMessage" class="status-message" style="display: none"></div>
+            </div>
+        </div>
+
+        <script>
+            class JimmyBuffettSongRanker {
+                constructor() {
+                    this.data = [];
+                    this.currentItems = [];
+                    this.scoresVisible = false;
+                    this.scoreVariance = 25;
+                    this.minScore = 0;
+                    this.listVisible = false;
+                    this.totalVotes = 0;
+
+                    this.toggleScoresButton = document.getElementById("toggleScores");
+                    this.scoreVarianceSlider = document.getElementById("scoreVariance");
+                    this.varianceValueSpan = document.getElementById("varianceValue");
+                    this.minScoreSlider = document.getElementById("minScore");
+                    this.minScoreValueSpan = document.getElementById("minScoreValue");
+                    this.toggleListButton = document.getElementById("toggleList");
+                    this.rankingList = document.getElementById("rankingList");
+                    this.rankingContent = document.getElementById("rankingContent");
+                    this.exportCsvButton = document.getElementById("exportCsv");
+                    this.exportControls = document.querySelector(".export-controls");
+                    this.statusMessage = document.getElementById("statusMessage");
+                    this.comparisonContainer = document.getElementById("comparisonContainer");
+
+                    this.initializeGame();
+                    this.setupEventListeners();
+                }
+
+                initializeGame() {
+                    // Load data from localStorage
+                    const storedData = localStorage.getItem("scoreComparisonData");
+                    if (storedData) {
+                        try {
+                            const parsedData = JSON.parse(storedData);
+                            this.data = parsedData.data || parsedData;
+                            this.totalVotes = parsedData.totalVotes || 0;
+                            this.showMessage("Data loaded from localStorage!", "success");
+                        } catch (error) {
+                            this.showMessage("Error loading data from localStorage. Using sample data.", "error");
+                            this.loadSampleData();
+                        }
+                    } else {
+                        this.showMessage("No data found in localStorage. Using sample data.", "error");
+                        this.loadSampleData();
+                    }
+
+                    // Automatically load 2 random items on page load
+                    this.loadRandomItems();
+                }
+
+                loadSampleData() {
+                    // Create sample data with comprehensive Jimmy Buffett songs list
+                    this.data = [
+                        { name: "A Lot To Drink About", score: 50 },
+                        { name: "A Love Song (From A Different Point Of View)", score: 50 },
+                        { name: "A Mile High In Denver", score: 50 },
+                        { name: "A Pirate Looks At Forty", score: 50 },
+                        { name: "A Sailor's Christmas", score: 50 },
+                        { name: "A Salty Piece of Land", score: 50 },
+                        { name: "A Thousand Steps To Nowhere", score: 50 },
+                        { name: "Abandoned on Tuesday", score: 50 },
+                        { name: "Ace", score: 50 },
+                        { name: "African Friend", score: 50 },
+                        { name: "Ain't He A Genius", score: 50 },
+                        { name: "All The Ways I Want You", score: 50 },
+                        { name: "Altered Boy", score: 50 },
+                        { name: "An Attitude of Gratitude", score: 50 },
+                        { name: "Another Saturday Night", score: 50 },
+                        { name: "Anything, Anytime, Anywhere", score: 50 },
+                        { name: "Apocalypso", score: 50 },
+                        { name: "Asking Us to Dance", score: 50 },
+                        { name: "Autour Du Rocher", score: 50 },
+                        { name: "Baby's Gone Shoppin'", score: 50 },
+                        { name: "Back To The Island", score: 50 },
+                        { name: "Ballad Of Skip Wiley", score: 50 },
+                        { name: "Ballad Of Spider John", score: 50 },
+                        { name: "Bama Breeze", score: 50 },
+                        { name: "Banana Republics", score: 50 },
+                        { name: "Banana Wind", score: 50 },
+                        { name: "Barefoot Children", score: 50 },
+                        { name: "Barefootin'", score: 50 },
+                        { name: "Barometer Soup", score: 50 },
+                        { name: "Barstool Boogie", score: 50 },
+                        { name: "Bank Of Bad Habits", score: 50 },
+                        { name: "Beach House On The Moon", score: 50 },
+                        { name: "Beautiful Swimmers", score: 50 },
+                        { name: "Bend A Little", score: 50 },
+                        { name: "Beyond The End", score: 50 },
+                        { name: "Big Rig", score: 50 },
+                        { name: "Big Top", score: 50 },
+                        { name: "Bigger Than The Both Of Us", score: 50 },
+                        { name: "Biloxi", score: 50 },
+                        { name: "Blowin' in the Wind", score: 50 },
+                        { name: "Blue Guitar", score: 50 },
+                        { name: "Blue Heaven Rendezvous", score: 50 },
+                        { name: "Boat Drinks", score: 50 },
+                        { name: "Boats To Build", score: 50 },
+                        { name: "Bob Robert's Society Band", score: 50 },
+                        { name: "Boomerang Love", score: 50 },
+                        { name: "Brahma Fear", score: 50 },
+                        { name: "Brand New Country Star", score: 50 },
+                        { name: "Breathe In, Breathe Out, Move On", score: 50 },
+                        { name: "Bring Back The Magic", score: 50 },
+                        { name: "Brown Eyed Girl", score: 50 },
+                        { name: "Buffet Hotel", score: 50 },
+                        { name: "Burn That Bridge", score: 50 },
+                        { name: "Buttermilk Grove", score: 50 },
+                        { name: "Calaloo", score: 50 },
+                        { name: "California Promises", score: 50 },
+                        { name: "Can't Remember When I Slept Last", score: 50 },
+                        { name: "Captain America", score: 50 },
+                        { name: "Carnival World", score: 50 },
+                        { name: "Caribbean Amphibian", score: 50 },
+                        { name: "Champagne Si, Aqua No", score: 50 },
+                        { name: "Champion of the World", score: 50 },
+                        { name: "Changes In Latitudes, Changes In Attitudes", score: 50 },
+                        { name: "Changing Channels", score: 50 },
+                        { name: "Chanson Pour Les Petits Enfants", score: 50 },
+                        { name: "Cheeseburger In Paradise", score: 50 },
+                        { name: "Christmas In The Caribbean", score: 50 },
+                        { name: "Christmas Island", score: 50 },
+                        { name: "Cinco De Mayo In Memphis", score: 50 },
+                        { name: "Cliches", score: 50 },
+                        { name: "Coast Of Carolina", score: 50 },
+                        { name: "Coastal Confessions", score: 50 },
+                        { name: "Coast Of Marseilles", score: 50 },
+                        { name: "Coconut Telegraph", score: 50 },
+                        { name: "Colour Of The Sun", score: 50 },
+                        { name: "Columbus", score: 50 },
+                        { name: "Come Monday", score: 50 },
+                        { name: "Come On In", score: 50 },
+                        { name: "Come To The Moon", score: 50 },
+                        { name: "Conky Tonkin'", score: 50 },
+                        { name: "Countin' The Cows Ev'ry Day", score: 50 },
+                        { name: "Cowboy In The Jungle", score: 50 },
+                        { name: "Creola", score: 50 },
+                        { name: "Cuban Crime Of Passion", score: 50 },
+                        { name: "Cultural Infidel", score: 50 },
+                        { name: "Dallas", score: 50 },
+                        { name: "Death Of An Unpopular Poet", score: 50 },
+                        { name: "Death Valley Lives", score: 50 },
+                        { name: "Defying Gravity", score: 50 },
+                        { name: "Delaney Talks To Statues", score: 50 },
+                        { name: "Desdemona's Building A Rocket Ship", score: 50 },
+                        { name: "Desperation Samba (Halloween In Tijuana)", score: 50 },
+                        { name: "Diamond As Big As The Ritz", score: 50 },
+                        { name: "Distantly In Love", score: 50 },
+                        { name: "Do You Know What it Means to Miss New Orleans?", score: 50 },
+                        { name: "Domicile", score: 50 },
+                        { name: "Domino College", score: 50 },
+                        { name: "Don't Bring Me Candy", score: 50 },
+                        { name: "Don't Bug Me", score: 50 },
+                        { name: "Don't Chu Know", score: 50 },
+                        { name: "Door Number Three", score: 50 },
+                        { name: "Dreamsicle", score: 50 },
+                        { name: "Duke's On Sunday", score: 50 },
+                        { name: "Earl's Dead – Cadillac For Sale", score: 50 },
+                        { name: "Einstein Was A Surfer", score: 50 },
+                        { name: "Ellis Dee", score: 50 },
+                        { name: "Elvis Imitators", score: 50 },
+                        { name: "Elvis Presley Blues", score: 50 },
+                        { name: "England", score: 50 },
+                        { name: "Everybody's Got A Cousin In Miami", score: 50 },
+                        { name: "Everybody's On The Phone", score: 50 },
+                        { name: "Everybody's On The Run", score: 50 },
+                        { name: "Everybody's Talkin'", score: 50 },
+                        { name: "Everlasting Moon", score: 50 },
+                        { name: "False Echoes", score: 50 },
+                        { name: "Far Side Of The World", score: 50 },
+                        { name: "Fat Person Man", score: 50 },
+                        { name: "Fins", score: 50 },
+                        { name: "First Look", score: 50 },
+                        { name: "Flesh And Bone", score: 50 },
+                        { name: "Floridays", score: 50 },
+                        { name: "Fool Button", score: 50 },
+                        { name: "Frank And Lola", score: 50 },
+                        { name: "Frenchman For The Night", score: 50 },
+                        { name: "Fruitcakes", score: 50 },
+                        { name: "Funeral Dance", score: 50 },
+                        { name: "Gentlemen of Leisure", score: 50 },
+                        { name: "Getting the Picture", score: 50 },
+                        { name: "God Don't Own A Car", score: 50 },
+                        { name: "God's Own Drunk", score: 50 },
+                        { name: "Good Guys Win", score: 50 },
+                        { name: "Goodnight Irene", score: 50 },
+                        { name: "Grapefruit Juicy Fruit", score: 50 },
+                        { name: "Gravity Storm", score: 50 },
+                        { name: "Great Heart", score: 50 },
+                        { name: "Green Flash At Sunset", score: 50 },
+                        { name: "Growing Older But Not Up", score: 50 },
+                        { name: "Gulf Coast Highway", score: 50 },
+                        { name: "Gumbo", score: 50 },
+                        { name: "Gypsies In The Palace", score: 50 },
+                        { name: "Havana Daydreamin'", score: 50 },
+                        { name: "Happily Ever After", score: 50 },
+                        { name: "Happy Xmas (The War Is Over)", score: 50 },
+                        { name: "Henny's Song (The Key To My Man)", score: 50 },
+                        { name: "He Went To Paris", score: 50 },
+                        { name: "Hello Texas", score: 50 },
+                        { name: "Here We Are", score: 50 },
+                        { name: "Hey Good Lookin'", score: 50 },
+                        { name: "High Cumberland Dilemma", score: 50 },
+                        { name: "High Cumberland Jubile / Comin' Down Slow", score: 50 },
+                        { name: "Ho Ho Ho And A Bottle Of Rhum", score: 50 },
+                        { name: "Holiday", score: 50 },
+                        { name: "Homemade Music", score: 50 },
+                        { name: "Honey Do", score: 50 },
+                        { name: "Hula Girl At Heart", score: 50 },
+                        { name: "I'm No Russian", score: 50 },
+                        { name: "I Can't Be Your Hero Today", score: 50 },
+                        { name: "I Don't Know (Spicoli's Theme)", score: 50 },
+                        { name: "I Don't Know And I Don't Care", score: 50 },
+                        { name: "I Have Found Me A Home", score: 50 },
+                        { name: "I Heard I Was In Town", score: 50 },
+                        { name: "I Love The Now", score: 50 },
+                        { name: "I Love This Town", score: 50 },
+                        { name: "I Used To Have Money One Time", score: 50 },
+                        { name: "I Want To Go Back To Cartagena", score: 50 },
+                        { name: "I Wave Bye Bye", score: 50 },
+                        { name: "I'll Be Home For Christmas", score: 50 },
+                        { name: "I Will Play For Gumbo", score: 50 },
+                        { name: "I Wish Lunch Could Last Forever", score: 50 },
+                        { name: "If I Could Just Get It On Paper", score: 50 },
+                        { name: "If It All Falls Down", score: 50 },
+                        { name: "If The Phone Doesn't Ring It's Me", score: 50 },
+                        { name: "Incommunicado", score: 50 },
+                        { name: "In My Room", score: 50 },
+                        { name: "In The Same Boat", score: 50 },
+                        { name: "In The Shelter", score: 50 },
+                        { name: "Island", score: 50 },
+                        { name: "Island Fever", score: 50 },
+                        { name: "It's 5 O'Clock Somewhere", score: 50 },
+                        { name: "It's a Big Old Goofy World", score: 50 },
+                        { name: "It's All About The Water", score: 50 },
+                        { name: "It's Midnight And I'm Not Famous Yet", score: 50 },
+                        { name: "It's My Job", score: 50 },
+                        { name: "Jamaica Farewell", score: 50 },
+                        { name: "Jamaica Mistaica", score: 50 },
+                        { name: "Jimmy Dreams", score: 50 },
+                        { name: "Jingle Bells", score: 50 },
+                        { name: "Jolly Mon Sing", score: 50 },
+                        { name: "Just An Old Truth Teller", score: 50 },
+                        { name: "Kick It In Second Wind", score: 50 },
+                        { name: "King Of Somewhere Hot", score: 50 },
+                        { name: "Kinja Rules", score: 50 },
+                        { name: "Knees Of My Heart", score: 50 },
+                        { name: "La Vie Dansante", score: 50 },
+                        { name: "Lady I Can't Explain", score: 50 },
+                        { name: "Lage Nom Ai", score: 50 },
+                        { name: "L'Air De La Louisiane", score: 50 },
+                        { name: "Landfall", score: 50 },
+                        { name: "Last Man Standing", score: 50 },
+                        { name: "Last Mango In Paris", score: 50 },
+                        { name: "Left Me With A Nail To Drive", score: 50 },
+                        { name: "License To Chill", score: 50 },
+                        { name: "Life Is Just A Tire Swing", score: 50 },
+                        { name: "Life Short Call Now", score: 50 },
+                        { name: "Lighthouse", score: 50 },
+                        { name: "Lip Service", score: 50 },
+                        { name: "Little Miss Magic", score: 50 },
+                        { name: "Livin' It Up", score: 50 },
+                        { name: "Livingston Saturday Night", score: 50 },
+                        { name: "Livingston's Gone To Texas", score: 50 },
+                        { name: "Lone Palm", score: 50 },
+                        { name: "Love And Luck", score: 50 },
+                        { name: "Love In Decline", score: 50 },
+                        { name: "Love In The Library", score: 50 },
+                        { name: "Lovely Cruise", score: 50 },
+                        { name: "Lucky Stars", score: 50 },
+                        { name: "Mack the Knife", score: 50 },
+                        { name: "Mademoiselle (Voulez-Vous Danser)", score: 50 },
+                        { name: "Makin' Music For Money", score: 50 },
+                        { name: "Manana", score: 50 },
+                        { name: "Margaritaville", score: 50 },
+                        { name: "Math Suks", score: 50 },
+                        { name: "Meet Me In Memphis", score: 50 },
+                        { name: "Mele Kalikimaka", score: 50 },
+                        { name: "Mental Floss", score: 50 },
+                        { name: "Mermaid In The Night", score: 50 },
+                        { name: "Merry Christmas Alabama (Never Far From Home)", score: 50 },
+                        { name: "Mexico", score: 50 },
+                        { name: "Middle Of The Night", score: 50 },
+                        { name: "Migration", score: 50 },
+                        { name: "Miss You So Badly", score: 50 },
+                        { name: "Money Back Guarantee", score: 50 },
+                        { name: "Morris' Nightmare", score: 50 },
+                        { name: "My Barracuda", score: 50 },
+                        { name: "My Head Hurts, My Feet Stink, And I Don't Love Jesus", score: 50 },
+                        { name: "My Lovely Lady", score: 50 },
+                        { name: "Natives Are Restless Tonight", score: 50 },
+                        { name: "Nautical Wheelers", score: 50 },
+                        { name: "No Plane On Sunday", score: 50 },
+                        { name: "Nobody From Nowhere", score: 50 },
+                        { name: "Nobody Speaks To The Captain No More", score: 50 },
+                        { name: "Nothin' But A Breeze", score: 50 },
+                        { name: "Off To See The Lizard", score: 50 },
+                        { name: "Oldest Surfer On The Beach", score: 50 },
+                        { name: "On A Slow Boat To China", score: 50 },
+                        { name: "One Particular Harbour", score: 50 },
+                        { name: "Only Time Will Tell", score: 50 },
+                        { name: "Overkill", score: 50 },
+                        { name: "Oysters And Pearls", score: 50 },
+                        { name: "Pacing The Cage", score: 50 },
+                        { name: "Paradise", score: 50 },
+                        { name: "Party At The End Of The World", score: 50 },
+                        { name: "Peanut Butter Conspiracy", score: 50 },
+                        { name: "Peddlers and Pushers", score: 50 },
+                        { name: "Permanenet Reminder Of A Temporary Feeling", score: 50 },
+                        { name: "Piece Of Work", score: 50 },
+                        { name: "Pencil Thin Mustache", score: 50 },
+                        { name: "Perrier Blues", score: 50 },
+                        { name: "Playin' The Loser Again", score: 50 },
+                        { name: "Please Bypass This Heart", score: 50 },
+                        { name: "Please Take Your Drunken 15 year old girlfriend Home", score: 50 },
+                        { name: "Presents To Send You", score: 50 },
+                        { name: "Pre-You", score: 50 },
+                        { name: "Prince Of Tides", score: 50 },
+                        { name: "Public Relations", score: 50 },
+                        { name: "Purple People Eater", score: 50 },
+                        { name: "Quietly Making Noise", score: 50 },
+                        { name: "Ragtop Day", score: 50 },
+                        { name: "Railroad Lady", score: 50 },
+                        { name: "Rancho Deluxe (Main Title)", score: 50 },
+                        { name: "Rancho Deluxe (End Title)", score: 50 },
+                        { name: "Reggabilly Hill", score: 50 },
+                        { name: "Remittance Man", score: 50 },
+                        { name: "Reservation at Preservation Hall", score: 50 },
+                        { name: "Rhumba Man", score: 50 },
+                        { name: "Richard Frost", score: 50 },
+                        { name: "Ringling, Ringling", score: 50 },
+                        { name: "Rockefeller Square", score: 50 },
+                        { name: "Rue De La Guitare", score: 50 },
+                        { name: "Run Rudolph Run", score: 50 },
+                        { name: "Sail On Sailor", score: 50 },
+                        { name: "Savannah Fare You Well", score: 50 },
+                        { name: "Saxophones", score: 50 },
+                        { name: "Scarlet Begonias", score: 50 },
+                        { name: "School Boy Heart", score: 50 },
+                        { name: "Sea Cruise", score: 50 },
+                        { name: "Sea Of Heartbreak", score: 50 },
+                        { name: "Semi-True Story", score: 50 },
+                        { name: "Sending The Old Man Home", score: 50 },
+                        { name: "Serpentine", score: 50 },
+                        { name: "Sheila Says", score: 50 },
+                        { name: "She's Going Out Of My Mind", score: 50 },
+                        { name: "She's Got You", score: 50 },
+                        { name: "Silver Wings", score: 50 },
+                        { name: "Simply Complicated", score: 50 },
+                        { name: "Six String Music", score: 50 },
+                        { name: "Smart Woman (In A Real Short Skirt)", score: 50 },
+                        { name: "Someday I Will", score: 50 },
+                        { name: "Someone I Used To Know", score: 50 },
+                        { name: "Something 'Bout a Boat", score: 50 },
+                        { name: "Something So Feminine About A Mandolin", score: 50 },
+                        { name: "Somewhere Over China", score: 50 },
+                        { name: "Son Of A Son Of A Sailor", score: 50 },
+                        { name: "Soulfully", score: 50 },
+                        { name: "Southern Cross", score: 50 },
+                        { name: "Souvenirs", score: 50 },
+                        { name: "Spending Money", score: 50 },
+                        { name: "Stars Fell On Alabama", score: 50 },
+                        { name: "Stars On The Water", score: 50 },
+                        { name: "Steamer", score: 50 },
+                        { name: "Stories We Could Tell", score: 50 },
+                        { name: "Stranded On A Sandbar", score: 50 },
+                        { name: "Strange Bird", score: 50 },
+                        { name: "Summerzcool", score: 50 },
+                        { name: "Sunny Afternoon", score: 50 },
+                        { name: "Surfing In A Hurricane", score: 50 },
+                        { name: "Survive", score: 50 },
+                        { name: "Take Another Road", score: 50 },
+                        { name: "Take It Back", score: 50 },
+                        { name: "Tampico Trauma", score: 50 },
+                        { name: "That's My Story And I'm Stickin' To It", score: 50 },
+                        { name: "That's What Living Is To Me", score: 50 },
+                        { name: "The Captain And The Kid", score: 50 },
+                        { name: "The Christian", score: 50 },
+                        { name: "The City", score: 50 },
+                        { name: "The Good Fight", score: 50 },
+                        { name: "The Great Filling Station Holdup", score: 50 },
+                        { name: "The Handiest Frenchman In The Caribbean", score: 50 },
+                        { name: "The Hangout Gang", score: 50 },
+                        { name: "The Legend Of Norman Paperman / Kinja", score: 50 },
+                        { name: "The Last Line", score: 50 },
+                        { name: "The Missionary", score: 50 },
+                        { name: "The Night I Painted The Sky", score: 50 },
+                        { name: "The Pascagoula Run", score: 50 },
+                        { name: "The Perfect Partner", score: 50 },
+                        { name: "The Rocket That Grandpa Rode", score: 50 },
+                        { name: "The Weather Is Here, Wish You Were Beautiful", score: 50 },
+                        { name: "The Wino And I Know", score: 50 },
+                        { name: "There's Nothing Soft About Hard Times", score: 50 },
+                        { name: "They Don't Dance Like Carmen No More", score: 50 },
+                        { name: "This Hotel Room", score: 50 },
+                        { name: "Tides", score: 50 },
+                        { name: "Tiki Bar is Open", score: 50 },
+                        { name: "Time Loves a Hero", score: 50 },
+                        { name: "Time To Go Home", score: 50 },
+                        { name: "Tin Cup Chalice", score: 50 },
+                        { name: "Today's Message", score: 50 },
+                        { name: "Tonight I Just Need My Guitar", score: 50 },
+                        { name: "Too Drunk for Karaoke", score: 50 },
+                        { name: "Travelin' Clean", score: 50 },
+                        { name: "Treat Her Like A Lady", score: 50 },
+                        { name: "Treetop Flyer", score: 50 },
+                        { name: "Trip Around The Sun", score: 50 },
+                        { name: "Trouble on the Horizon", score: 50 },
+                        { name: "Truckstop Salvation", score: 50 },
+                        { name: "Trying To Reason With Hurricane Season", score: 50 },
+                        { name: "Turnabout", score: 50 },
+                        { name: "Turning Around", score: 50 },
+                        { name: "Turn Up The Heat And Chill The Rosé", score: 50 },
+                        { name: "Twelve Volt Man", score: 50 },
+                        { name: "Uncle John's Band", score: 50 },
+                        { name: "Up On The Hill", score: 50 },
+                        { name: "Up On The House Top", score: 50 },
+                        { name: "Useless and Important Information", score: 50 },
+                        { name: "USS Zydecoldsmobile", score: 50 },
+                        { name: "Vampires, Mummies, And The Holy Ghost", score: 50 },
+                        { name: "Volcano", score: 50 },
+                        { name: "Waiting For The Next Explosion", score: 50 },
+                        { name: "We Are The People Our Parents Warned Us About", score: 50 },
+                        { name: "We Learned To Be Cool From You", score: 50 },
+                        { name: "Weather With You", score: 50 },
+                        { name: "We're Still Here", score: 50 },
+                        { name: "Werewolves Of London", score: 50 },
+                        { name: "West Nashville Grand Ballroom Gown", score: 50 },
+                        { name: "What If The Hokey Pokey Is All It Really Is About", score: 50 },
+                        { name: "Wheel Inside The Wheel", score: 50 },
+                        { name: "When Salome Plays The Drum", score: 50 },
+                        { name: "When The Coast Is Clear", score: 50 },
+                        { name: "When The Wild Life Betrays Me", score: 50 },
+                        { name: "Where's The Party", score: 50 },
+                        { name: "Who Are We Trying To Fool", score: 50 },
+                        { name: "Who's The Blonde Stranger", score: 50 },
+                        { name: "Whoop De Doo", score: 50 },
+                        { name: "Why Don't We Get Drunk", score: 50 },
+                        { name: "Why The Things We Do", score: 50 },
+                        { name: "Why You Wanna Hurt My Heart", score: 50 },
+                        { name: "Wildflowers", score: 50 },
+                        { name: "Window On The World", score: 50 },
+                        { name: "Wings", score: 50 },
+                        { name: "Woman Goin' Crazy On Caroline Street", score: 50 },
+                        { name: "Wonder Why We Ever Go Home", score: 50 },
+                        { name: "Wondering Where The Lions Are", score: 50 },
+                        { name: "You Call It Jogging", score: 50 },
+                        { name: "You'll Never Work In Dis Bidness Again", score: 50 },
+                    ];
+                    this.totalVotes = 0;
+                    this.saveData();
+                }
+
+                setupEventListeners() {
+                    this.toggleScoresButton.addEventListener("change", () => this.toggleScores());
+                    this.scoreVarianceSlider.addEventListener("input", () => this.updateScoreVariance());
+                    this.minScoreSlider.addEventListener("input", () => this.updateMinScore());
+                    this.toggleListButton.addEventListener("click", () => this.toggleList());
+                    this.exportCsvButton.addEventListener("click", () => this.exportToCsv());
+                }
+
+                loadRandomItems() {
+                    // Filter items by minimum score
+                    const eligibleItems = this.data.filter((item) => item.score >= this.minScore);
+
+                    if (eligibleItems.length < 2) {
+                        this.showMessage(
+                            `Not enough items with score ≥ ${this.minScore}. Try lowering the minimum score.`,
+                            "error"
+                        );
+                        return;
+                    }
+
+                    // Find pairs of eligible items with score difference <= scoreVariance
+                    const validPairs = [];
+                    for (let i = 0; i < eligibleItems.length; i++) {
+                        for (let j = i + 1; j < eligibleItems.length; j++) {
+                            const scoreDiff = Math.abs(eligibleItems[i].score - eligibleItems[j].score);
+                            if (scoreDiff <= this.scoreVariance) {
+                                validPairs.push([eligibleItems[i], eligibleItems[j]]);
+                            }
+                        }
+                    }
+
+                    if (validPairs.length === 0) {
+                        this.showMessage(
+                            `No items found with score ≥ ${this.minScore} and score difference ≤ ${this.scoreVariance}. Try adjusting the filters.`,
+                            "error"
+                        );
+                        return;
+                    }
+
+                    // Select a random valid pair
+                    const randomPair = validPairs[Math.floor(Math.random() * validPairs.length)];
+                    this.currentItems = randomPair;
+
+                    this.displayItems();
+                    this.comparisonContainer.style.display = "flex";
+                }
+
+                displayItems() {
+                    this.comparisonContainer.innerHTML = "";
+
+                    this.currentItems.forEach((item, index) => {
+                        const itemCard = document.createElement("div");
+                        itemCard.className = "item-card";
+                        itemCard.innerHTML = `
+                         <div class="item-name">${item.name}</div>
+                         <div class="item-score" style="display: ${this.scoresVisible ? "block" : "none"}">${
+                            item.score
+                        }</div>
+                         <button class="select-button" onclick="game.selectItem(${index})" title="Select ${item.name}">
+                             👍
+                         </button>
+                     `;
+                        this.comparisonContainer.appendChild(itemCard);
+                    });
+                }
+
+                selectItem(selectedIndex) {
+                    const selectedItem = this.currentItems[selectedIndex];
+                    const otherItem = this.currentItems[1 - selectedIndex];
+
+                    // Update scores
+                    selectedItem.score += 1;
+                    otherItem.score -= 1;
+
+                    // Ensure scores don't go below 0
+                    if (otherItem.score < 0) {
+                        otherItem.score = 0;
+                    }
+
+                    // Update the data array
+                    this.data.forEach((item) => {
+                        if (item.name === selectedItem.name) {
+                            item.score = selectedItem.score;
+                        } else if (item.name === otherItem.name) {
+                            item.score = otherItem.score;
+                        }
+                    });
+
+                    // Increment total votes counter
+                    this.totalVotes++;
+
+                    // Save updated data
+                    this.saveData();
+
+                    // Update display
+                    this.displayItems();
+
+                    // Update ranking list if it's visible
+                    if (this.listVisible) {
+                        this.updateRankingList();
+                    }
+
+                    // Immediately load 2 new random items
+                    setTimeout(() => {
+                        this.loadRandomItems();
+                    }, 500);
+                }
+
+                toggleScores() {
+                    this.scoresVisible = this.toggleScoresButton.checked;
+
+                    // Update the display if items are currently shown
+                    if (this.currentItems.length > 0) {
+                        this.displayItems();
+                    }
+                }
+
+                updateScoreVariance() {
+                    this.scoreVariance = parseInt(this.scoreVarianceSlider.value);
+                    this.varianceValueSpan.textContent = this.scoreVariance;
+                }
+
+                updateMinScore() {
+                    this.minScore = parseInt(this.minScoreSlider.value);
+                    this.minScoreValueSpan.textContent = this.minScore;
+                }
+
+                toggleList() {
+                    this.listVisible = !this.listVisible;
+                    this.toggleListButton.textContent = this.listVisible ? "Hide Full Ranking" : "Show Full Ranking";
+
+                    if (this.listVisible) {
+                        this.rankingContent.style.display = "block";
+                        this.exportControls.style.display = "block";
+                        this.updateRankingList();
+                    } else {
+                        this.rankingContent.style.display = "none";
+                        this.exportControls.style.display = "none";
+                    }
+                }
+
+                updateRankingList() {
+                    // Sort data by score (highest to lowest)
+                    const sortedData = [...this.data].sort((a, b) => b.score - a.score);
+
+                    this.rankingContent.innerHTML = "";
+
+                    // Add total votes header
+                    const votesHeader = document.createElement("div");
+                    votesHeader.className = "votes-header";
+                    votesHeader.innerHTML = `
+                         <div class="votes-info">
+                             <span class="votes-label">Total Votes:</span>
+                             <span class="votes-count">${this.totalVotes}</span>
+                         </div>
+                     `;
+                    this.rankingContent.appendChild(votesHeader);
+
+                    sortedData.forEach((item, index) => {
+                        const rankingItem = document.createElement("div");
+                        rankingItem.className = "ranking-item";
+                        rankingItem.innerHTML = `
+                             <div class="ranking-position">${index + 1}</div>
+                             <div class="ranking-name">${item.name}</div>
+                             <div class="ranking-score">${item.score}</div>
+                         `;
+                        this.rankingContent.appendChild(rankingItem);
+                    });
+                }
+
+                exportToCsv() {
+                    // Sort data by score (highest to lowest)
+                    const sortedData = [...this.data].sort((a, b) => b.score - a.score);
+
+                    // Create CSV content
+                    let csvContent = "Rank,Song Name,Score\n";
+                    sortedData.forEach((item, index) => {
+                        const rank = index + 1;
+                        const songName = `"${item.name.replace(/"/g, '""')}"`; // Escape quotes in song names
+                        const score = item.score;
+                        csvContent += `${rank},${songName},${score}\n`;
+                    });
+
+                    // Add metadata
+                    csvContent += `\nTotal Votes,${this.totalVotes}\n`;
+                    csvContent += `Export Date,${new Date().toLocaleString()}\n`;
+
+                    // Create and download file
+                    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute(
+                        "download",
+                        `jimmy-buffett-song-rankings-${new Date().toISOString().split("T")[0]}.csv`
+                    );
+                    link.style.visibility = "hidden";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    this.showMessage("CSV file downloaded successfully!", "success");
+                }
+
+                saveData() {
+                    const dataToSave = {
+                        data: this.data,
+                        totalVotes: this.totalVotes,
+                    };
+                    localStorage.setItem("scoreComparisonData", JSON.stringify(dataToSave));
+                }
+
+                showMessage(message, type) {
+                    this.statusMessage.textContent = message;
+                    this.statusMessage.className = `status-message status-${type}`;
+                    this.statusMessage.style.display = "block";
+
+                    // Hide message after 3 seconds
+                    setTimeout(() => {
+                        this.statusMessage.style.display = "none";
+                    }, 3000);
+                }
+            }
+
+            // Initialize the game when the page loads
+            const game = new JimmyBuffettSongRanker();
+        </script>
+    </body>
+</html>
