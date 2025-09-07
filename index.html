@@ -398,6 +398,169 @@
                 border: 2px solid #ff6b6b;
             }
 
+            .management-section {
+                margin-top: 40px;
+                padding: 25px;
+                background: #f0fdfa;
+                border-radius: 20px;
+                border: 2px solid #00d4aa;
+                box-shadow: 0 8px 20px rgba(0, 212, 170, 0.15);
+            }
+
+            .management-section h3 {
+                color: #00b4db;
+                margin-bottom: 20px;
+                font-size: 1.3rem;
+                font-weight: 600;
+            }
+
+            .management-controls {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .management-button {
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            }
+
+            .management-button:hover {
+                background: #ff5252;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            }
+
+            .modal {
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-content {
+                background: #ffffff;
+                border-radius: 20px;
+                border: 2px solid #00d4aa;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .modal-header {
+                padding: 20px 25px;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-header h3 {
+                color: #00b4db;
+                margin: 0;
+                font-size: 1.3rem;
+                font-weight: 600;
+            }
+
+            .close {
+                color: #aaa;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: color 0.3s ease;
+            }
+
+            .close:hover {
+                color: #ff6b6b;
+            }
+
+            .modal-body {
+                padding: 25px;
+            }
+
+            .modal-body p {
+                color: #2d3748;
+                margin-bottom: 15px;
+                font-size: 1rem;
+            }
+
+            .song-select {
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #00d4aa;
+                border-radius: 10px;
+                font-size: 1rem;
+                background: #ffffff;
+                color: #2d3748;
+                cursor: pointer;
+                transition: border-color 0.3s ease;
+            }
+
+            .song-select:focus {
+                outline: none;
+                border-color: #00b4db;
+                box-shadow: 0 0 0 3px rgba(0, 180, 219, 0.1);
+            }
+
+            .modal-footer {
+                padding: 20px 25px;
+                border-top: 1px solid #e0e0e0;
+                display: flex;
+                gap: 15px;
+                justify-content: flex-end;
+            }
+
+            .confirm-button {
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 20px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .confirm-button:hover {
+                background: #ff5252;
+                transform: translateY(-2px);
+            }
+
+            .cancel-button {
+                background: #6c757d;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 20px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .cancel-button:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+            }
+
             @media (max-width: 768px) {
                 .comparison-container {
                     flex-direction: column;
@@ -466,7 +629,50 @@
                     </div>
                 </div>
 
+                <div id="managementSection" class="management-section">
+                    <h3>Management</h3>
+                    <div class="management-controls">
+                        <button id="removeSongBtn" class="management-button">Remove Song</button>
+                    </div>
+                </div>
+
                 <div id="statusMessage" class="status-message" style="display: none"></div>
+            </div>
+        </div>
+
+        <!-- Remove Song Modal -->
+        <div id="removeSongModal" class="modal" style="display: none">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Remove Song</h3>
+                    <span class="close" id="closeRemoveModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>Select a song to remove from the ranking:</p>
+                    <select id="songSelect" class="song-select">
+                        <option value="">Choose a song...</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button id="confirmRemoveBtn" class="confirm-button">Remove Song</button>
+                    <button id="cancelRemoveBtn" class="cancel-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="modal" style="display: none">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Removal</h3>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">Are you sure you want to remove this song?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="finalConfirmBtn" class="confirm-button">Yes, Remove</button>
+                    <button id="finalCancelBtn" class="cancel-button">Cancel</button>
+                </div>
             </div>
         </div>
 
@@ -493,6 +699,20 @@
                     this.exportControls = document.querySelector(".export-controls");
                     this.statusMessage = document.getElementById("statusMessage");
                     this.comparisonContainer = document.getElementById("comparisonContainer");
+
+                    // Management elements
+                    this.removeSongBtn = document.getElementById("removeSongBtn");
+                    this.removeSongModal = document.getElementById("removeSongModal");
+                    this.songSelect = document.getElementById("songSelect");
+                    this.closeRemoveModal = document.getElementById("closeRemoveModal");
+                    this.confirmRemoveBtn = document.getElementById("confirmRemoveBtn");
+                    this.cancelRemoveBtn = document.getElementById("cancelRemoveBtn");
+                    this.confirmModal = document.getElementById("confirmModal");
+                    this.confirmMessage = document.getElementById("confirmMessage");
+                    this.finalConfirmBtn = document.getElementById("finalConfirmBtn");
+                    this.finalCancelBtn = document.getElementById("finalCancelBtn");
+
+                    this.songToRemove = null;
 
                     this.initializeGame();
                     this.setupEventListeners();
@@ -928,6 +1148,24 @@
                     this.minScoreSlider.addEventListener("input", () => this.updateMinScore());
                     this.toggleListButton.addEventListener("click", () => this.toggleList());
                     this.exportCsvButton.addEventListener("click", () => this.exportToCsv());
+
+                    // Management event listeners
+                    this.removeSongBtn.addEventListener("click", () => this.showRemoveSongModal());
+                    this.closeRemoveModal.addEventListener("click", () => this.hideRemoveSongModal());
+                    this.cancelRemoveBtn.addEventListener("click", () => this.hideRemoveSongModal());
+                    this.confirmRemoveBtn.addEventListener("click", () => this.showConfirmModal());
+                    this.finalConfirmBtn.addEventListener("click", () => this.removeSong());
+                    this.finalCancelBtn.addEventListener("click", () => this.hideConfirmModal());
+
+                    // Close modals when clicking outside
+                    window.addEventListener("click", (event) => {
+                        if (event.target === this.removeSongModal) {
+                            this.hideRemoveSongModal();
+                        }
+                        if (event.target === this.confirmModal) {
+                            this.hideConfirmModal();
+                        }
+                    });
                 }
 
                 loadRandomItems() {
@@ -1143,6 +1381,89 @@
                     setTimeout(() => {
                         this.statusMessage.style.display = "none";
                     }, 3000);
+                }
+
+                showRemoveSongModal() {
+                    this.populateSongSelect();
+                    this.removeSongModal.style.display = "flex";
+                }
+
+                hideRemoveSongModal() {
+                    this.removeSongModal.style.display = "none";
+                    this.songSelect.value = "";
+                    this.songToRemove = null;
+                }
+
+                showConfirmModal() {
+                    const selectedSongName = this.songSelect.value;
+                    if (!selectedSongName) {
+                        this.showMessage("Please select a song to remove.", "error");
+                        return;
+                    }
+
+                    this.songToRemove = selectedSongName;
+                    this.confirmMessage.textContent = `Are you sure you want to remove "${selectedSongName}" from the ranking?`;
+
+                    // Hide the remove song modal but don't reset songToRemove yet
+                    this.removeSongModal.style.display = "none";
+                    this.songSelect.value = "";
+
+                    this.confirmModal.style.display = "flex";
+                }
+
+                hideConfirmModal() {
+                    this.confirmModal.style.display = "none";
+                    this.songToRemove = null;
+                }
+
+                populateSongSelect() {
+                    this.songSelect.innerHTML = '<option value="">Choose a song...</option>';
+
+                    // Sort songs alphabetically for easier selection
+                    const sortedSongs = [...this.data].sort((a, b) => a.name.localeCompare(b.name));
+
+                    sortedSongs.forEach((song) => {
+                        const option = document.createElement("option");
+                        option.value = song.name;
+                        option.textContent = song.name;
+                        this.songSelect.appendChild(option);
+                    });
+                }
+
+                removeSong() {
+                    if (!this.songToRemove) {
+                        this.showMessage("No song selected for removal.", "error");
+                        return;
+                    }
+
+                    // Find and remove the song
+                    const songIndex = this.data.findIndex((song) => song.name === this.songToRemove);
+                    if (songIndex === -1) {
+                        this.showMessage("Song not found in data.", "error");
+                        return;
+                    }
+
+                    // Remove the song
+                    this.data.splice(songIndex, 1);
+
+                    // Always refresh current items after removal to ensure removed song isn't displayed
+                    if (this.currentItems.length > 0) {
+                        this.loadRandomItems();
+                    }
+
+                    // Update ranking list if visible
+                    if (this.listVisible) {
+                        this.updateRankingList();
+                    }
+
+                    // Save data
+                    this.saveData();
+
+                    // Show success message
+                    this.showMessage(`"${this.songToRemove}" has been removed from the ranking.`, "success");
+
+                    // Hide confirmation modal
+                    this.hideConfirmModal();
                 }
             }
 
